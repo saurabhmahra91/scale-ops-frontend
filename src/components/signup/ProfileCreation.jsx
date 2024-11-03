@@ -7,35 +7,28 @@ import {
     LinearProgress,
 } from '@mui/material';
 
-function ProfileCreation() {
-    const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        phoneNumber: '',
-        gender: '',
-        dob: '',
-    });
-
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-        setFormData(prevData => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
+import AALink from './AALink';
+import Preferences from './Preferences';
+import Authentication from './Authentication';
 
 
-    const handleNext = () => {
-        // Implement next step logic here
-        console.log('Moving to next step');
-    };
-
-    useEffect(() => {
-
-        console.log('Form data:', formData);
-    }, [formData])
-
-
+function ProfileCreation(props) {
+    const [progress, setProgress] = useState(1);
+    const totalNumberOfSteps = 4;
+    const signupComponent = (step) => {
+        switch (step) {
+            case 1:
+                return <Authentication setProgress={setProgress}/>;
+            case 2:
+                return <Landing setProgress={setProgress}/>;
+            case 3:
+                return <AALink setProgress={setProgress}></AALink>;
+            case 4:
+                return <Preferences></Preferences>;
+            default:
+                return null;
+        }
+    }
     return <>
         <Box
             sx={{
@@ -50,7 +43,7 @@ function ProfileCreation() {
             <Box
                 sx={{
                     width: '100%',
-                    maxWidth: 400,
+                    maxWidth: 1000,
                     p: 4,
                     boxShadow: 3,
                     borderRadius: 2,
@@ -58,22 +51,22 @@ function ProfileCreation() {
                 }}
             >
                 <Typography variant="h5" gutterBottom align="left" color="text.primary">
-                    Create Your Profile
+                    Create an account
                 </Typography>
 
                 <Box sx={{ width: '100%', mb: 2 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2">Step 1 of 3</Typography>
-                        <Typography variant="body2">33%</Typography>
+                        <Typography variant="body2">Step {progress} of {totalNumberOfSteps}</Typography>
+                        <Typography variant="body2">{parseInt(progress / totalNumberOfSteps * 100)}%</Typography>
                     </Box>
                     <LinearProgress
                         variant="determinate"
-                        value={33.33}
+                        value={parseInt((progress / totalNumberOfSteps) * 100)}
                     />
                 </Box>
 
-                <Landing formData={formData} handleChange={handleChange} handleNext={handleNext} />
-                
+                {signupComponent(progress)}
+
             </Box>
         </Box>
     </>
