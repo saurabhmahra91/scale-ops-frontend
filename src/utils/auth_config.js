@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'http://127.0.0.1:5000';
 const AUTH_REFRESH_URL = BASE_URL + '/auth/refresh-token';
 
 /**

@@ -5,15 +5,13 @@ import ExplorePeople from './pages/ExplorePeople';
 
 function Dashboard() {
     const [loading, setLoading] = useState(false);
-    
+
     if (loading) {
         return <CircularProgress />;
     }
 
     return (
-        <SideDrawerLayout>
-            <ExplorePeople></ExplorePeople>
-        </SideDrawerLayout>
+        <ExplorePeople></ExplorePeople>
     );
 }
 

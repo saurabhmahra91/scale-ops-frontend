@@ -2,10 +2,11 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ProfileCreation from './components/signup/ProfileCreation';
 import { ThemeProvider, createTheme } from '@mui/material';
-import Chat from './components/Chat';
+import Chat from './components/chat/Chat';
 import Default from './components/Default';
 // Assuming you have a Dashboard component, if not, you'll need to create one
 import Dashboard from './components/Dashboard'; // You'll need to create this file
+import SideDrawerLayout from './components/SideDrawerLayout';
 
 const theme = createTheme({
     palette: {
@@ -37,17 +38,25 @@ const theme = createTheme({
     },
 });
 
+const WithSideDrawer = ({ children }) => (
+    <SideDrawerLayout>{children}</SideDrawerLayout>
+);
+const WithoutSideDrawer = ({ children }) => <>{children}</>;
+
+
 function App() {
     return (
         <ThemeProvider theme={theme}>
             <Router>
                 <Routes>
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/chat" element={<Chat/>} />
-                    <Route path="/signup" element={<ProfileCreation />} />
-                    {/* You might want to add a default route */}
-                    <Route path="/" element={<Default/>} />
-                    <Route path="/default" element={<Default/>} />
+                    <Route element={<WithSideDrawer />}>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/chat" element={<Chat />} />
+                    </Route>
+
+                    <Route element={<WithoutSideDrawer />}>
+                        <Route path="/signup" element={<ProfileCreation />} />
+                    </Route>
                 </Routes>
             </Router>
         </ThemeProvider>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import {
     Box,
     Drawer,
@@ -22,36 +23,45 @@ import {
     Favorite,
 } from '@mui/icons-material';
 
-export default function SideDrawerLayout({ children }) {
+export default function SideDrawerLayout() {
     const navigate = useNavigate();
+    const location = useLocation();
     const theme = useTheme();
-    const [selectedItem, setSelectedItem] = useState('Home');
+    const [selectedItem, setSelectedItem] = useState('');
+
+    useEffect(() => {
+        // Update selected item based on current route
+        const path = location.pathname;
+        if (path === '/') setSelectedItem('Home');
+        else if (path === '/profile') setSelectedItem('Profile');
+        else if (path === '/chat') setSelectedItem('Matches');
+        else if (path === '/settings') setSelectedItem('Settings');
+        else if (path === '/preferences') setSelectedItem('Match Preferences');
+    }, [location]);
 
     const handleLogout = () => {
-        // Clear access and refresh tokens from local storage
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('token_type');
-
-        // Navigate to the Default component
         navigate('/default');
     };
 
     const menuItems = [
-        { text: 'Home', icon: <Home /> },
-        { text: 'Profile', icon: <Person /> },
-        { text: 'Matches', icon: <Chat /> },
-        { text: 'Settings', icon: <Settings /> },
-        { text: 'Match Preferences', icon: <Tune /> },
+        { text: 'Home', icon: <Home />, path: '/' },
+        { text: 'Profile', icon: <Person />, path: '/profile' },
+        { text: 'Matches', icon: <Chat />, path: '/chat' },
+        { text: 'Settings', icon: <Settings />, path: '/settings' },
+        { text: 'Match Preferences', icon: <Tune />, path: '/preferences' },
     ];
     const bottomMenuItems = [
-        { text: 'Terms of Service', icon: <Description /> },
-        { text: 'Privacy Policy', icon: <PrivacyTip /> },
+        { text: 'Terms of Service', icon: <Description />, path: '/terms' },
+        { text: 'Privacy Policy', icon: <PrivacyTip />, path: '/privacy' },
         { text: 'Logout', icon: <ExitToApp />, onClick: handleLogout },
     ];
 
-    const handleItemClick = (text) => {
+    const handleItemClick = (text, path) => {
         setSelectedItem(text);
+        if (path) navigate(path);
     };
 
     return (
@@ -80,7 +90,7 @@ export default function SideDrawerLayout({ children }) {
                         <ListItem
                             button
                             key={item.text}
-                            onClick={() => handleItemClick(item.text)}
+                            onClick={() => handleItemClick(item.text, item.path)}
                             sx={{
                                 backgroundColor: selectedItem === item.text ? theme.palette.primary.main : 'transparent',
                                 color: selectedItem === item.text ? theme.palette.primary.contrastText : 'inherit',
@@ -100,7 +110,7 @@ export default function SideDrawerLayout({ children }) {
                         <ListItem
                             button
                             key={item.text}
-                            onClick={item.onClick || (() => handleItemClick(item.text))}
+                            onClick={item.onClick || (() => handleItemClick(item.text, item.path))}
                             sx={{
                                 backgroundColor: selectedItem === item.text ? theme.palette.primary.main : 'transparent',
                                 color: selectedItem === item.text ? theme.palette.primary.contrastText : 'inherit',
@@ -117,7 +127,7 @@ export default function SideDrawerLayout({ children }) {
             </Drawer>
 
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                {children}
+                <Outlet />
             </Box>
         </Box>
     );
