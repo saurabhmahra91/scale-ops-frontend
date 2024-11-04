@@ -8,6 +8,7 @@ import {
     ListItemText,
     Divider,
     useTheme,
+    Typography
 } from '@mui/material';
 import {
     Home,
@@ -18,6 +19,7 @@ import {
     Description,
     PrivacyTip,
     ExitToApp,
+    Favorite,
 } from '@mui/icons-material';
 
 export default function SideDrawerLayout({ children }) {
@@ -65,6 +67,14 @@ export default function SideDrawerLayout({ children }) {
                     },
                 }}
             >
+                <Box sx={{ display: 'flex', alignItems: 'center', padding: 2 }}>
+                    <Favorite sx={{ color: theme.palette.primary.main, marginRight: 1 }} />
+                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                        MatchMaker
+                    </Typography>
+                </Box>
+                <Divider />
+
                 <List>
                     {menuItems.map((item) => (
                         <ListItem

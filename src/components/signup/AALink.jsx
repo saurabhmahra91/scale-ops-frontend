@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import {
     Button,
     Box,
-    Typography
+    Typography,
+    CircularProgress
+
 } from '@mui/material';
 import api from '../../utils/auth_config';
 
@@ -15,6 +17,8 @@ function AALink(props) {
         let timeoutId;
         const proceedIfuserAcceptedConsent = async () => {
             try {
+                setProgress(4)
+                return 
                 const response = await api.post('/fiu/fetch-consent-status');
                 console.log("API call successful, data = ", response.data);
                 const consentStatus = response.data.status;
@@ -58,31 +62,11 @@ function AALink(props) {
         console.log("clicked on handleAALinkClick")
         try {
             const response = await api.post('/fiu/create-aa-redirect');
-            console.log("API call successful");
-            console.log("here is the data from backend:", response.data)
-            console.log("redirect url = ", response.data.redirect_url)
-
-            if (response.data && response.data.redirect_url) {
-                window.open(response.data.redirect_url, '_blank');
-                setWaitingForAACompletion(true);
-            } else {
-                console.error('No link received from the API');
-            }
+            window.open(response.data.redirect_url, "_blank", "noopener,noreferrer");
+            setWaitingForAACompletion(true);
         } catch (error) {
+
             console.error('Error calling the API:', error);
-            if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
-                console.error('Error data:', error.response.data);
-                console.error('Error status:', error.response.status);
-                console.error('Error headers:', error.response.headers);
-            } else if (error.request) {
-                // The request was made but no response was received
-                console.error('No response received:', error.request);
-            } else {
-                // Something happened in setting up the request that triggered an Error
-                console.error('Error message:', error.message);
-            }
         }
     };
 
@@ -96,7 +80,7 @@ function AALink(props) {
         </Box>
         <Box mb={2}>
             <Typography>
-                The account aggregator framework securely fetches your data to enhance matchmaking. We'll access your financial information and social profiles while ensuring data privacy and security.
+                The account aggregator framework securely fetches your data to enhance matchmaking. We&apos;ll access your financial information and social profiles while ensuring data privacy and security.
             </Typography>
         </Box>
 
@@ -160,15 +144,31 @@ function AALink(props) {
                 </Typography>
             </Box>
         </Box>
-        <Button
-            variant='contained'
-            color='primary'
-            onClick={handleAALinkClick}
-            fullWidth
-        >
-            Link Account Aggregator
-        </Button>
+        <Box display="flex" flexDirection="column" alignItems="center" mt={2}>
+            {!waitingForAACompletion && (
+                <Typography variant="body2" mb={2} textAlign="center" fontWeight="bold">
+                    After clicking the button below, a new tab will open. Once you&apos;ve accepted the consent in the new tab, please return to this page.
+                </Typography>
+            )}
+            {waitingForAACompletion && (
+                <>
+                    <CircularProgress size={40} />
+                    <Typography variant="body1" mt={2} mb={2}>
+                        Waiting for consent approval...
+                    </Typography>
+                </>
+            )}
+            <Button
+                variant='contained'
+                color='primary'
+                onClick={handleAALinkClick}
+                fullWidth
+                disabled={waitingForAACompletion}
+            >
+                Link Account Aggregator
+            </Button>
+        </Box>
     </>
-};
+}
 
 export default AALink;

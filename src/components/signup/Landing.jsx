@@ -10,21 +10,32 @@ import {
     InputLabel,
     Select,
     MenuItem,
-    Grid2
+    Grid2,
+    Autocomplete
 } from '@mui/material';
 
 import {
-    getFormattedGenderEnums,
-    getFormattedMaritalStatusEnums,
-    getFormattedReligionEnums,
-    getFormattedEducationLevelEnums,
-    getFormattedFamilyTypeEnums,
-    getFormattedDietaryPreferenceEnums,
-    getFormattedSmokingHabitEnums,
-    getFormattedDrinkingHabitEnums,
-    getFormattedNationalityEnums
+    getGenderEnums,
+    getMaritalStatusEnums,
+    getReligionEnums,
+    getEducationLevelEnums,
+    getFamilyTypeEnums,
+    getDietaryPreferenceEnums,
+    getSmokingHabitEnums,
+    getDrinkingHabitEnums,
+    getNationalityEnums,
+    getCasteCommunityEnums,
+    getLanguageEnums,
+    getCollegeEnums,
+    getProfessionEnums,
+    getFamilyValueEnums,
+    getHobbyEnums,
+    
 } from '../../utils/enum_number_to_value';
+
+
 import api from '../../utils/auth_config';
+import validateForm from '../../validations/profileCreation';
 
 function Landing(props) {
     const setProgress = props.setProgress;
@@ -33,27 +44,29 @@ function Landing(props) {
         "name": "",
         "dob": "1999-11-30",
         "city": "",
-        "nationality": 101,
+        "bio": "",
+        "height": 170,
+        "nationality": "India",
         "address": "",
-        "gender": 1,
-        "marital_status": 1,
-        "religion": 3,
-        "caste_community": "",
-        "mother_tongue": "",
-        "education_level": 5,
-        "college_attended": "",
-        "job_title": "",
-        "company_name": "",
+        "gender": "Female",
+        "marital_status": "Never Married",
+        "religion": "Atheistic",
+        "caste_community": "Brahmin",
+        "mother_tongue": "Hindi",
+        "education_level": "Post Doctoral",
+        "college_attended": "Birla Institute of Technology and Science",
+        "job_title": "Software Engineer",
+        "company_name": "Microsoft",
         "annual_income": 0,
-        "family_type": 1,
-        "fathers_occupation": "",
-        "mothers_occupation": "",
+        "family_type": "Joint Family",
+        "fathers_occupation": "Accountant",
+        "mothers_occupation": "Respiratory Therapist",
         "siblings": 2,
-        "family_values": "",
-        "dietary_preference": 2,
-        "smoking_habit": 1,
-        "drinking_habit": 1,
-        "hobbies_interests": ""
+        "family_values": "Progressive",
+        "dietary_preference": "Omnivore",
+        "smoking_habit": "Non Smoker",
+        "drinking_habit": "Occasional Drinker",
+        "hobbies_interests": []
     });
 
     const [selectedFile, setSelectedFile] = useState(null);
@@ -86,44 +99,54 @@ function Landing(props) {
         setErrors(newErrors);
     };
 
+
+    const uploadProfilePicture = async () => {
+        if (!selectedFile) return;
+
+        const imageFormData = new FormData();
+        imageFormData.append('image', selectedFile);
+
+        try {
+            const imageResponse = await api.put('/profile/image', imageFormData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            if (imageResponse.status === 200) {
+                console.log('Profile picture uploaded successfully');
+            }
+        } catch (imageError) {
+            console.error('Error uploading profile picture:', imageError);
+            // Handle image upload error (e.g., show error message to user)
+        }
+    };
+
+    const createProfile = async () => {
+        try {
+            const response = await api.post('/profile', formData);
+            return response.status === 200;
+        } catch (error) {
+            console.error('Error creating profile:', error);
+            throw error;
+        }
+    };
+
     const handleNext = async () => {
-        const formErrors = validateForm();
+        const formErrors = validateForm(formData);
         if (Object.keys(formErrors).length > 0) {
             setErrors(formErrors);
-        } else {
-            try {
-                // Step 1: Send JSON data to create the profile
-                const response = await api.post('/profile', formData);
+            return;
+        }
 
-                if (response.status === 200) {
-                    // Step 2: If profile creation is successful, upload the profile picture
-                    if (selectedFile) {
-                        const imageFormData = new FormData();
-                        imageFormData.append('image', selectedFile);
-
-                        try {
-                            const imageResponse = await api.put('/profile/image', imageFormData, {
-                                headers: {
-                                    'Content-Type': 'multipart/form-data',
-                                },
-                            });
-
-                            if (imageResponse.status === 200) {
-                                console.log('Profile picture uploaded successfully');
-                            }
-                        } catch (imageError) {
-                            console.error('Error uploading profile picture:', imageError);
-                            // Handle image upload error (e.g., show error message to user)
-                        }
-                    }
-
-                    // Move to the next step regardless of image upload success
-                    setProgress(previousProgress => previousProgress + 1);
-                }
-            } catch (error) {
-                console.error('Error creating profile:', error);
-                // Handle profile creation error (e.g., show error message to user)
+        try {
+            const profileCreated = await createProfile();
+            if (profileCreated) {
+                await uploadProfilePicture();
+                setProgress(previousProgress => previousProgress + 1);
             }
+        } catch (error) {
+            // Handle profile creation error (e.g., show error message to user)
+            console.error('Error in profile creation process:', error);
         }
     };
 
@@ -133,76 +156,80 @@ function Landing(props) {
     }, [formData])
 
     const [enums, setEnums] = useState({
-        genders: [],
-        maritalStatuses: [],
-        religions: [],
-        educationLevels: [],
-        familyTypes: [],
-        dietaryPreferences: [],
-        smokingHabits: [],
-        drinkingHabits: [],
-        nationalities: []
+        gender: [],
+        marital_status: [],
+        religion: [],
+        education_level: [],
+        family_type: [],
+        dietary_preference: [],
+        smoking_habit: [],
+        drinking_habit: [],
+        nationality: [],
+        caste_community: [],
+        mother_tongue: [],
+        college_attended: [],
+        job_title: [],
+        fathers_occupation: [],
+        mothers_occupation: [],
+        family_values: [],
+        hobbies_interests: []
     });
-
-    useEffect(() => { console.log("Enums == ", enums) }, [enums])
-    const handleLocationPermission = () => {
-        // Implement location permission logic here
-        console.log('Requesting location permission');
-    };
-
-    const renderDropdown = (name, label, options) => (
-        <FormControl fullWidth margin="normal">
-            <InputLabel>{label}</InputLabel>
-            <Select
-                name={name}
-                value={formData[name] || ''}
-                onChange={HandleChangeInFormData}
-                label={label}
-            >
-                {options.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                        {option.name}
-                    </MenuItem>
-                ))}
-            </Select>
-        </FormControl>
-    );
 
     useEffect(() => {
         const fetchEnums = async () => {
             try {
                 const [
-                    genders,
-                    maritalStatuses,
-                    religions,
-                    educationLevels,
-                    familyTypes,
-                    dietaryPreferences,
-                    smokingHabits,
-                    drinkingHabits,
-                    nationalities
+                    gender,
+                    marital_status,
+                    religion,
+                    education_level,
+                    family_type,
+                    dietary_preference,
+                    smoking_habit,
+                    drinking_habit,
+                    nationality,
+                    caste_community,
+                    mother_tongue,
+                    college_attended,
+                    profession,
+                    family_values,
+                    hobbies_interests
                 ] = await Promise.all([
-                    getFormattedGenderEnums(),
-                    getFormattedMaritalStatusEnums(),
-                    getFormattedReligionEnums(),
-                    getFormattedEducationLevelEnums(),
-                    getFormattedFamilyTypeEnums(),
-                    getFormattedDietaryPreferenceEnums(),
-                    getFormattedSmokingHabitEnums(),
-                    getFormattedDrinkingHabitEnums(),
-                    getFormattedNationalityEnums()
+                    getGenderEnums(),
+                    getMaritalStatusEnums(),
+                    getReligionEnums(),
+                    getEducationLevelEnums(),
+                    getFamilyTypeEnums(),
+                    getDietaryPreferenceEnums(),
+                    getSmokingHabitEnums(),
+                    getDrinkingHabitEnums(),
+                    getNationalityEnums(),
+                    getCasteCommunityEnums(),
+                    getLanguageEnums(),
+                    getCollegeEnums(),
+                    getProfessionEnums(),
+                    getFamilyValueEnums(),
+                    getHobbyEnums()
                 ]);
 
                 setEnums({
-                    genders,
-                    maritalStatuses,
-                    religions,
-                    educationLevels,
-                    familyTypes,
-                    dietaryPreferences,
-                    smokingHabits,
-                    drinkingHabits,
-                    nationalities
+                    gender,
+                    marital_status,
+                    religion,
+                    education_level,
+                    family_type,
+                    dietary_preference,
+                    smoking_habit,
+                    drinking_habit,
+                    nationality,
+                    caste_community,
+                    mother_tongue,
+                    college_attended,
+                    job_title: profession,
+                    fathers_occupation: profession,
+                    mothers_occupation: profession,
+                    family_values,
+                    hobbies_interests
                 });
             } catch (error) {
                 console.error('Error fetching enums:', error);
@@ -212,14 +239,33 @@ function Landing(props) {
         fetchEnums();
     }, []);
 
+    useEffect(() => { console.log("Enums == ", enums) }, [enums])
 
-    const validateForm = () => {
-        let newErrors = {};
-        if (formData.name.trim() === '') {
-            newErrors.name = 'Name cannot be empty';
-        }
-        return newErrors;
+    const handleLocationPermission = () => {
+        // Implement location permission logic here
+        console.log('Requesting location permission');
     };
+
+
+    const renderDropdown = (name, label, options) => (
+        <FormControl fullWidth margin="normal">
+            <Autocomplete
+                disablePortal
+                id={`autocomplete-${name}`}
+                options={options}
+                value={formData[name] || null}
+                onChange={(event, newValue) => {
+                    HandleChangeInFormData({
+                        target: { name, value: newValue }
+                    });
+                }}
+                renderInput={(params) => <TextField {...params} label={label} />}
+                isOptionEqualToValue={(option, value) => option === value}
+            />
+        </FormControl>
+    );
+
+
 
 
     return (
@@ -256,36 +302,96 @@ function Landing(props) {
                 )}
             </Box>
 
+            <TextField
+                fullWidth
+                label="Tell people about you"
+                name="bio"
+                value={formData.bio}
+                onChange={HandleChangeInFormData}
+                margin="normal"
+                error={!!errors.bio}
+                helperText={errors.bio}
+            />
+
+
             <Grid2 container spacing={2}>
                 <Grid2 item size={4}>
-                    {renderDropdown('gender', 'Gender', enums.genders)}
+                    {renderDropdown('gender', 'Gender', enums.gender)}
                 </Grid2>
                 <Grid2 item size={4}>
-                    {renderDropdown('marital_status', 'Marital Status', enums.maritalStatuses)}
+                    {renderDropdown('marital_status', 'Marital Status', enums.marital_status)}
                 </Grid2>
                 <Grid2 item size={4}>
-                    {renderDropdown('religion', 'Religion', enums.religions)}
+                    {renderDropdown('religion', 'Religion', enums.religion)}
                 </Grid2>
                 <Grid2 item size={4}>
-                    {renderDropdown('education_level', 'Education Level', enums.educationLevels)}
+                    {renderDropdown('education_level', 'Education Level', enums.education_level)}
                 </Grid2>
                 <Grid2 item size={4}>
-                    {renderDropdown('family_type', 'Family Type', enums.familyTypes)}
+                    {renderDropdown('family_type', 'Family Type', enums.family_type)}
                 </Grid2>
                 <Grid2 item size={4}>
-                    {renderDropdown('dietary_preference', 'Dietary Preference', enums.dietaryPreferences)}
+                    {renderDropdown('dietary_preference', 'Dietary Preference', enums.dietary_preference)}
                 </Grid2>
                 <Grid2 item size={4}>
-                    {renderDropdown('smoking_habit', 'Smoking Habit', enums.smokingHabits)}
+                    {renderDropdown('smoking_habit', 'Smoking Habit', enums.smoking_habit)}
                 </Grid2>
                 <Grid2 item size={4}>
-                    {renderDropdown('drinking_habit', 'Drinking Habit', enums.drinkingHabits)}
+                    {renderDropdown('drinking_habit', 'Drinking Habit', enums.drinking_habit)}
                 </Grid2>
                 <Grid2 item size={12}>
-                    {renderDropdown('nationality', 'Nationality', enums.nationalities)}
+                    {renderDropdown('nationality', 'Nationality', enums.nationality)}
                 </Grid2>
+                <Grid2 item size={4}>
+                    {renderDropdown('caste_community', 'Caste/Community', enums.caste_community)}
+                </Grid2>
+                <Grid2 item size={4}>
+                    {renderDropdown('mother_tongue', 'Mother Tongue', enums.mother_tongue)}
+                </Grid2>
+                <Grid2 item size={4}>
+                    {renderDropdown('college_attended', 'College Attended', enums.college_attended)}
+                </Grid2>
+                <Grid2 item size={4}>
+                    {renderDropdown('job_title', 'Job Title', enums.job_title)}
+                </Grid2>
+                <Grid2 item size={4}>
+                    {renderDropdown('fathers_occupation', "Father's Occupation", enums.fathers_occupation)}
+                </Grid2>
+                <Grid2 item size={4}>
+                    {renderDropdown('mothers_occupation', "Mother's Occupation", enums.mothers_occupation)}
+                </Grid2>
+                <Grid2 item size={4}>
+                    {renderDropdown('family_values', 'Family Values', enums.family_values)}
+                </Grid2>
+                <Grid2 item size={12}>
+                    <FormControl fullWidth margin="normal">
+                        <Autocomplete
+                            multiple
+                            id="autocomplete-hobbies-interests"
+                            options={enums.hobbies_interests}
+                            value={formData.hobbies_interests}
+                            onChange={(event, newValue) => {
+                                HandleChangeInFormData({
+                                    target: { name: 'hobbies_interests', value: newValue }
+                                });
+                            }}
+                            renderInput={(params) => <TextField {...params} label="Hobbies and Interests" />}
+                            isOptionEqualToValue={(option, value) => option === value}
+                        />
+                    </FormControl>
+                </Grid2>
+
             </Grid2>
 
+            <TextField
+                fullWidth
+                label="Height (in cm)"
+                name="height"
+                type="number"
+                value={formData.height}
+                onChange={HandleChangeInFormData}
+                margin="normal"
+            />
 
             <TextField
                 fullWidth
@@ -300,42 +406,6 @@ function Landing(props) {
                 margin="normal"
             />
 
-            <TextField
-                fullWidth
-                label="Caste/Community"
-                name="caste_community"
-                placeholder="Brahmin"
-                value={formData.caste_community}
-                onChange={HandleChangeInFormData}
-                margin="normal"
-            />
-            <TextField
-                fullWidth
-                label="Mother Tongue"
-                name="mother_tongue"
-                placeholder="English, Hindi"
-                value={formData.mother_tongue}
-                onChange={HandleChangeInFormData}
-                margin="normal"
-            />
-            <TextField
-                fullWidth
-                label="College Attended"
-                name="college_attended"
-                placeholder="Indian Institute of Science Education and Research Bhopal"
-                value={formData.college_attended}
-                onChange={HandleChangeInFormData}
-                margin="normal"
-            />
-            <TextField
-                fullWidth
-                label="Job Title"
-                name="job_title"
-                placeholder="Software Engineer"
-                value={formData.job_title}
-                onChange={HandleChangeInFormData}
-                margin="normal"
-            />
             <TextField
                 fullWidth
                 label="Company Name"
@@ -354,24 +424,7 @@ function Landing(props) {
                 onChange={HandleChangeInFormData}
                 margin="normal"
             />
-            <TextField
-                fullWidth
-                label="Father's Occupation"
-                name="fathers_occupation"
-                placeholder="Doctor"
-                value={formData.fathers_occupation}
-                onChange={HandleChangeInFormData}
-                margin="normal"
-            />
-            <TextField
-                fullWidth
-                label="Mother's Occupation"
-                placeholder="Doctor"
-                name="mothers_occupation"
-                value={formData.mothers_occupation}
-                onChange={HandleChangeInFormData}
-                margin="normal"
-            />
+
             <TextField
                 fullWidth
                 label="Number of Siblings"
@@ -381,24 +434,6 @@ function Landing(props) {
                 onChange={HandleChangeInFormData}
                 margin="normal"
             />
-            <TextField
-                fullWidth
-                label="Family Values"
-                name="family_values"
-                placeholder="Financially conservative, Spiritualists"
-                value={formData.family_values}
-                onChange={HandleChangeInFormData}
-                margin="normal"
-            />
-            <TextField
-                fullWidth
-                label="Hobbies and Interests"
-                name="hobbies_interests"
-                value={formData.hobbies_interests}
-                onChange={HandleChangeInFormData}
-                margin="normal"
-            />
-
 
             <Button
                 fullWidth

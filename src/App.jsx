@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ProfileCreation from './components/signup/ProfileCreation';
 import { ThemeProvider, createTheme } from '@mui/material';
+import Chat from './components/Chat';
 import Default from './components/Default';
 // Assuming you have a Dashboard component, if not, you'll need to create one
 import Dashboard from './components/Dashboard'; // You'll need to create this file
@@ -42,6 +43,7 @@ function App() {
             <Router>
                 <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/chat" element={<Chat/>} />
                     <Route path="/signup" element={<ProfileCreation />} />
                     {/* You might want to add a default route */}
                     <Route path="/" element={<Default/>} />

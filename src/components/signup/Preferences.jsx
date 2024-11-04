@@ -7,99 +7,174 @@ import {
     InputLabel,
     Select,
     MenuItem,
+    TextField,
     Checkbox,
-    FormGroup,
     FormControlLabel,
     Button,
-    Grid2,
     Box,
+    Collapse,
+    Alert
 } from '@mui/material';
 import api from '../../utils/auth_config';
-import { getFormattedMaritalStatusEnums, getFormattedReligionEnums, getFormattedNationalityEnums, getFormattedEducationLevelEnums } from '../../utils/enum_number_to_value';
+import {
+    getMaritalStatusEnums,
+    getReligionEnums,
+    getNationalityEnums,
+    getEducationLevelEnums,
+    getLanguageEnums,
+    getProfessionEnums,
+    getGenderEnums,
+    getFamilyTypeEnums,
+    getDietaryPreferenceEnums,
+    getSmokingHabitEnums,
+    getDrinkingHabitEnums,
+    getCasteCommunityEnums,
+    getFamilyValueEnums,
+    getHobbyEnums
+} from '../../utils/enum_number_to_value';
+import { Autocomplete } from '@mui/material';
+
 
 
 function Preferences() {
     const navigate = useNavigate();
+    const [showSuccessMessage, setShowSuccessMessage] = useState(true);
     const [preferences, setPreferences] = useState({
         min_age: 18,
         max_age: 80,
-        min_height_centimeters: 50,
-        max_height_centimeters: 250,
-        preferred_marital_status: "",
-        preferred_religion: "",
-        preferred_communities: [],
-        preferred_mother_tongues: [],
-        preferred_education_levels: [],
-        preferred_occupations: [],
-        preferred_countries: [101],
+        min_height_centimeters: 150,
+        max_height_centimeters: 200,
+        gender: null,
+        marital_statuses: [],
+        religion: null,
+        education_levels: [],
+        family_types: [],
+        dietary_preferences: [],
+        smoking_habits: [],
+        drinking_habits: [],
+        caste_communities: [],
+        mother_tongue: null,
+        profession: null,
+        family_values: [],
+        hobbies: [],
+        nationality: null,
         willing_to_relocate: false,
     });
 
-    const [maritalStatusOptions, setMaritalStatusOptions] = useState([]);
-    const [religionOptions, setReligionOptions] = useState([]);
-    const [educationLevelOptions, setEducationLevelOptions] = useState([]);
-    const [countryOptions, setCountryOptions] = useState([]);
+    const [enums, setEnums] = useState({
+        marital_status: [],
+        religion: [],
+        education_level: [],
+        countries: [],
+        languages: [],
+        occupations: [],
+        gender: [],
+        family_type: [],
+        dietary_preference: [],
+        smoking_habit: [],
+        drinking_habit: [],
+        caste_community: [],
+        family_values: [],
+        hobbies: []
+    });
 
     useEffect(() => {
-        fetchOptions();
-        fetchMaritalStatusOptions();
-        fetchReligionOptions();
-        fetchEducationLevelOptions();
-        fetchCountryOptions();
+        const fetchEnums = async () => {
+            try {
+                const [
+                    marital_status,
+                    religion,
+                    education_level,
+                    countries,
+                    languages,
+                    occupations,
+                    gender,
+                    family_type,
+                    dietary_preference,
+                    smoking_habit,
+                    drinking_habit,
+                    caste_community,
+                    family_values,
+                    hobbies
+                ] = await Promise.all([
+                    getMaritalStatusEnums(),
+                    getReligionEnums(),
+                    getEducationLevelEnums(),
+                    getNationalityEnums(),
+                    getLanguageEnums(),
+                    getProfessionEnums(),
+                    getGenderEnums(),
+                    getFamilyTypeEnums(),
+                    getDietaryPreferenceEnums(),
+                    getSmokingHabitEnums(),
+                    getDrinkingHabitEnums(),
+                    getCasteCommunityEnums(),
+                    getFamilyValueEnums(),
+                    getHobbyEnums()
+                ]);
 
+                setEnums({
+                    marital_status,
+                    religion,
+                    education_level,
+                    countries,
+                    languages,
+                    occupations,
+                    gender,
+                    family_type,
+                    dietary_preference,
+                    smoking_habit,
+                    drinking_habit,
+                    caste_community,
+                    family_values,
+                    hobbies
+                });
+            } catch (error) {
+                console.error('Error fetching enums:', error);
+            }
+        };
+
+        fetchEnums();
+        fetchPreferences();
     }, []);
 
-    const fetchOptions = async () => {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowSuccessMessage(false);
+        }, 10000);
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    const fetchPreferences = async () => {
         try {
             const response = await api.get('/preferences/me');
-            console.log('Fetched options:', response.data);
-            setPreferences(response.data);
+            console.log('from backend', response);
+
+            // Create a new object with the response data
+            const fetchedPreferences = response.data;
+
+            // Populate multiple select fields with empty arrays if they're null
+            const multipleSelectFields = [
+                'marital_statuses', 'education_levels', 'family_types',
+                'dietary_preferences', 'smoking_habits', 'drinking_habits',
+                'caste_communities', 'family_values', 'hobbies'
+            ];
+
+            multipleSelectFields.forEach(field => {
+                if (fetchedPreferences[field] === null) {
+                    fetchedPreferences[field] = [];
+                }
+            });
+
+            // Update the preferences state
+            setPreferences(fetchedPreferences);
         } catch (error) {
-            console.error('Error fetching options:', error);
+            console.error('Error fetching preferences:', error);
         }
     };
 
-
-    const fetchMaritalStatusOptions = async () => {
-        try {
-            const options = await getFormattedMaritalStatusEnums();
-            setMaritalStatusOptions(options);
-        } catch (error) {
-            console.error('Error fetching marital status options:', error);
-        }
-    };
-
-    const fetchReligionOptions = async () => {
-        try {
-            const options = await getFormattedReligionEnums();
-            setReligionOptions(options);
-        } catch (error) {
-            console.error('Error fetching religion options:', error);
-        }
-    };
-
-    const fetchEducationLevelOptions = async () => {
-        try {
-            const options = await getFormattedEducationLevelEnums();
-            setEducationLevelOptions(options);
-        } catch (error) {
-            console.error('Error fetching education level options:', error);
-        }
-    };
-
-    const fetchCountryOptions = async () => {
-        try {
-            const options = await getFormattedNationalityEnums();
-            setCountryOptions(options);
-        } catch (error) {
-            console.error('Error fetching country options:', error);
-        }
-    };
-
-
-
-    const handleChange = (event) => {
-        const { name, value } = event.target;
+    const handleChange = (name, value) => {
         setPreferences({ ...preferences, [name]: value });
     };
 
@@ -122,8 +197,8 @@ function Preferences() {
             <Typography variant="h4" gutterBottom>
                 Matchmaking Preferences
             </Typography>
-            <Grid2 container spacing={3}>
-                <Grid2 item size={6}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', flexDirection: "column", gap: 3 }}>
+                <Box sx={{ width: { xs: '100%' } }}>
                     <Typography gutterBottom>Age Range</Typography>
                     <Slider
                         value={[preferences.min_age, preferences.max_age]}
@@ -134,8 +209,8 @@ function Preferences() {
                         min={18}
                         max={80}
                     />
-                </Grid2>
-                <Grid2 item size={6}>
+                </Box>
+                <Box sx={{ width: { xs: '100%' } }}>
                     <Typography gutterBottom>Height Range (cm)</Typography>
                     <Slider
                         value={[preferences.min_height_centimeters, preferences.max_height_centimeters]}
@@ -143,168 +218,139 @@ function Preferences() {
                             setPreferences({ ...preferences, min_height_centimeters: newValue[0], max_height_centimeters: newValue[1] });
                         }}
                         valueLabelDisplay="auto"
-                        min={50}
-                        max={250}
+                        min={150}
+                        max={200}
                     />
-                </Grid2>
-                <Grid2 item size={4}>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>Preferred Marital Status</InputLabel>
-                        <Select
-                            name="preferred_marital_status"
-                            value={preferences.preferred_marital_status}
-                            onChange={handleChange}
-                            label="Preferred Marital Status"
-                        >
-                            {maritalStatusOptions.map((status) => (
-                                <MenuItem key={status.value} value={status.value}>
-                                    {status.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid2>
-                <Grid2 item size={4}>
-                   <FormControl fullWidth margin="normal">
-                       <InputLabel>Preferred Religion</InputLabel>
-                       <Select
-                           name="preferred_religion"
-                           value={preferences.preferred_religion}
-                           onChange={handleChange}
-                           label="Preferred Religion"
-                       >
-                           {religionOptions.map((religion) => (
-                               <MenuItem key={religion.value} value={religion.value}>
-                                   {religion.name}
-                               </MenuItem>
-                           ))}
-                       </Select>
-                   </FormControl>
-                </Grid2>
-                <Grid2 item size={4}>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>Preferred Communities</InputLabel>
-                        <Select
-                            multiple
-                            name="preferred_communities"
-                            value={preferences.preferred_communities}
-                            onChange={handleMultipleChange}
-                            label="Preferred Communities"
-                            renderValue={(selected) => selected.join(', ')}
-                        >
-                            {preferences.preferred_communities.map((community) => (
-                                <MenuItem key={community} value={community}>
-                                    <Checkbox checked={preferences.preferred_communities.indexOf(community) > -1} />
-                                    <Typography>{community}</Typography>
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid2>
-                <Grid2 item size={4}>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>Preferred Mother Tongues</InputLabel>
-                        <Select
-                            multiple
-                            name="preferred_mother_tongues"
-                            value={preferences.preferred_mother_tongues}
-                            onChange={handleMultipleChange}
-                            label="Preferred Mother Tongues"
-                            renderValue={(selected) => selected.join(', ')}
-                        >
-                            {preferences.preferred_mother_tongues.map((language) => (
-                                <MenuItem key={language} value={language}>
-                                    <Checkbox checked={preferences.preferred_mother_tongues.indexOf(language) > -1} />
-                                    <Typography>{language}</Typography>
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid2>
-                <Grid2 item size={4}>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>Preferred Education Levels</InputLabel>
-                        <Select
-                            multiple
-                            name="preferred_education_levels"
-                            value={preferences.preferred_education_levels}
-                            onChange={handleMultipleChange}
-                            label="Preferred Education Levels"
-                            renderValue={(selected) => selected.map(value => 
-                                educationLevelOptions.find(option => option.value === value)?.name
-                            ).join(', ')}
-                        >
-                            {educationLevelOptions.map((level) => (
-                                <MenuItem key={level.value} value={level.value}>
-                                    <Checkbox checked={preferences.preferred_education_levels.indexOf(level.value) > -1} />
-                                    <Typography>{level.name}</Typography>
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid2>
-                <Grid2 item size={4}>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>Preferred Occupations</InputLabel>
-                        <Select
-                            multiple
-                            name="preferred_occupations"
-                            value={preferences.preferred_occupations}
-                            onChange={handleMultipleChange}
-                            label="Preferred Occupations"
-                            renderValue={(selected) => selected.join(', ')}
-                        >
-                            {preferences.preferred_occupations.map((occupation) => (
-                                <MenuItem key={occupation} value={occupation}>
-                                    <Checkbox checked={preferences.preferred_occupations.indexOf(occupation) > -1} />
-                                    <Typography>{occupation}</Typography>
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid2>
-                <Grid2 item size={4}>
-                    <FormControl fullWidth margin="normal">
-                        <InputLabel>Preferred Countries</InputLabel>
-                        <Select
-                            multiple
-                            name="preferred_countries"
-                            value={preferences.preferred_countries}
-                            onChange={handleMultipleChange}
-                            label="Preferred Countries"
-                            renderValue={(selected) => selected.map(value => 
-                                countryOptions.find(option => option.value === value)?.name
-                            ).join(', ')}
-                        >
-                            {countryOptions.map((country) => (
-                                <MenuItem key={country.value} value={country.value}>
-                                    <Checkbox checked={preferences.preferred_countries.indexOf(country.value) > -1} />
-                                    <Typography>{country.name}</Typography>
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid2>
-                <Grid2 item size={4}>
-                    <FormGroup>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={preferences.willing_to_relocate}
-                                    onChange={(e) => setPreferences({ ...preferences, willing_to_relocate: e.target.checked })}
-                                    name="willing_to_relocate"
-                                />
-                            }
-                            label="Willing to Relocate"
-                        />
-                    </FormGroup>
-                </Grid2>
-                <Grid2 item size={12}>
-                    <Button variant="contained" color="primary" onClick={handleSubmit} fullWidth>
+                </Box>
+
+
+                <Autocomplete
+                    options={enums.gender}
+                    value={preferences.gender}
+                    onChange={(event, newValue) => handleChange('gender', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Gender" />}
+                />
+
+                <Autocomplete
+                    multiple
+                    options={enums.marital_status}
+                    value={preferences.marital_statuses}
+                    onChange={(event, newValue) => handleChange('marital_statuses', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Marital Status" />}
+                />
+
+                <Autocomplete
+                    options={enums.religion}
+                    value={preferences.religion}
+                    onChange={(event, newValue) => handleChange('religion', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Religion" />}
+                />
+
+                <Autocomplete
+                    multiple
+                    options={enums.education_level}
+                    value={preferences.education_levels}
+                    onChange={(event, newValue) => handleChange('education_levels', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Education Levels" />}
+                />
+
+                <Autocomplete
+                    multiple
+                    options={enums.family_type}
+                    value={preferences.family_types}
+                    onChange={(event, newValue) => handleChange('family_types', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Family Types" />}
+                />
+
+                <Autocomplete
+                    multiple
+                    options={enums.dietary_preference}
+                    value={preferences.dietary_preferences}
+                    onChange={(event, newValue) => handleChange('dietary_preferences', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Dietary Preferences" />}
+                />
+
+                <Autocomplete
+                    multiple
+                    options={enums.smoking_habit}
+                    value={preferences.smoking_habits}
+                    onChange={(event, newValue) => handleChange('smoking_habits', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Smoking Habits" />}
+                />
+
+                <Autocomplete
+                    multiple
+                    options={enums.drinking_habit}
+                    value={preferences.drinking_habits}
+                    onChange={(event, newValue) => handleChange('drinking_habits', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Drinking Habits" />}
+                />
+
+                <Autocomplete
+                    multiple
+                    options={enums.caste_community}
+                    value={preferences.caste_communities}
+                    onChange={(event, newValue) => handleChange('caste_communities', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Caste/Community" />}
+                />
+
+                <Autocomplete
+                    options={enums.languages}
+                    value={preferences.mother_tongue}
+                    onChange={(event, newValue) => handleChange('mother_tongue', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Mother Tongue" />}
+                />
+
+                <Autocomplete
+                    options={enums.occupations}
+                    value={preferences.profession}
+                    onChange={(event, newValue) => handleChange('profession', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Profession" />}
+                />
+
+                <Autocomplete
+                    multiple
+                    options={enums.family_values}
+                    value={preferences.family_values}
+                    onChange={(event, newValue) => handleChange('family_values', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Family Values" />}
+                />
+
+                <Autocomplete
+                    multiple
+                    options={enums.hobbies}
+                    value={preferences.hobbies}
+                    onChange={(event, newValue) => handleChange('hobbies', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Hobbies" />}
+                />
+
+                <Autocomplete
+                    options={enums.countries}
+                    value={preferences.nationality}
+                    onChange={(event, newValue) => handleChange('nationality', newValue)}
+                    renderInput={(params) => <TextField {...params} label="Nationality" />}
+                />
+
+
+
+                <Box sx={{ width: '100%' }}>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={preferences.willing_to_relocate}
+                                onChange={(e) => setPreferences({ ...preferences, willing_to_relocate: e.target.checked })}
+                                name="willing_to_relocate"
+                            />
+                        }
+                        label="Willing to relocate"
+                    />
+                </Box>
+                <Box sx={{ width: '100%', mt: 2 }}>
+                    <Button variant="contained" color="primary" onClick={handleSubmit}>
                         Save Preferences
                     </Button>
-                </Grid2>
-            </Grid2>
+                </Box>
+            </Box>
         </Box>
     );
 }
