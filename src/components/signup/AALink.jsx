@@ -17,11 +17,7 @@ function AALink(props) {
         let timeoutId;
         const proceedIfuserAcceptedConsent = async () => {
             try {
-                const isDevelopment = import.meta.env.VITE_APP_ENV != "production";
-                if (isDevelopment) {
-                    setProgress(4)
-                    return
-                }
+
                 const response = await api.post('/fiu/fetch-consent-status');
                 console.log("API call successful, data = ", response.data);
                 const consentStatus = response.data.status;
@@ -62,6 +58,15 @@ function AALink(props) {
 
 
     const handleAALinkClick = async () => {
+
+        const isDevelopment = import.meta.env.VITE_APP_ENV != "production";
+        console.log(isDevelopment, "isDevelopment mode");
+        if (isDevelopment) {
+            setProgress(4)
+            return
+        }
+
+
         console.log("clicked on handleAALinkClick")
         try {
             const response = await api.post('/fiu/create-aa-redirect');

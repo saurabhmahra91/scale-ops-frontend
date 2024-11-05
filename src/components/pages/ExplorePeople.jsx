@@ -17,7 +17,7 @@ import {
     ArrowBack,
     ArrowForward,
 } from '@mui/icons-material';
-import api from '../../utils/auth_config';
+import api, { BASE_URL } from '../../utils/auth_config';
 
 
 export default function ExplorePeople() {
@@ -200,7 +200,7 @@ export default function ExplorePeople() {
                         objectFit: 'cover',
                         objectPosition: 'center',
                     }}
-                    image={recommendedUser.image}
+                    image={BASE_URL + "/"+ recommendedUser.image}
                     alt={recommendedUser.name}
                 />
                 <CardContent
