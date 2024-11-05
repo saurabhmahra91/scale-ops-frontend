@@ -41,8 +41,6 @@ const theme = createTheme({
 const WithSideDrawer = ({ children }) => (
     <SideDrawerLayout>{children}</SideDrawerLayout>
 );
-const WithoutSideDrawer = ({ children }) => <>{children}</>;
-
 
 function App() {
     return (
@@ -53,10 +51,7 @@ function App() {
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/chat" element={<Chat />} />
                     </Route>
-
-                    <Route element={<WithoutSideDrawer />}>
-                        <Route path="/signup" element={<ProfileCreation />} />
-                    </Route>
+                    <Route path="/signup" element={<ProfileCreation />} />
                 </Routes>
             </Router>
         </ThemeProvider>

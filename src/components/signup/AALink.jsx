@@ -17,8 +17,11 @@ function AALink(props) {
         let timeoutId;
         const proceedIfuserAcceptedConsent = async () => {
             try {
-                setProgress(4)
-                return 
+                const isDevelopment = import.meta.env.VITE_APP_ENV != "production";
+                if (isDevelopment) {
+                    setProgress(4)
+                    return
+                }
                 const response = await api.post('/fiu/fetch-consent-status');
                 console.log("API call successful, data = ", response.data);
                 const consentStatus = response.data.status;

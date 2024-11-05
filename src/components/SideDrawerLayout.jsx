@@ -24,11 +24,17 @@ import {
 } from '@mui/icons-material';
 
 export default function SideDrawerLayout() {
+
     const navigate = useNavigate();
     const location = useLocation();
     const theme = useTheme();
     const [selectedItem, setSelectedItem] = useState('');
 
+    if (!localStorage.getItem('access_token')) {
+        navigate('/');
+        return null;
+    }
+    
     useEffect(() => {
         // Update selected item based on current route
         const path = location.pathname;
@@ -43,7 +49,7 @@ export default function SideDrawerLayout() {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('token_type');
-        navigate('/default');
+        navigate('/');
     };
 
     const menuItems = [

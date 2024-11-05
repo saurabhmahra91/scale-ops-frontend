@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://127.0.0.1:5000';
+const BASE_URL = import.meta.env.VITE_APP_ENV == "production" ? 'http://34.47.193.47:5000/api' : 'http://127.0.0.1:5000/api'
 const AUTH_REFRESH_URL = BASE_URL + '/auth/refresh-token';
 
 /**

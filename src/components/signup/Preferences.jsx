@@ -186,7 +186,7 @@ function Preferences() {
     const handleSubmit = async () => {
         try {
             await api.post('/preferences/me', { ...preferences });
-            navigate('/dashboard');
+            navigate('/');
         } catch (error) {
             console.error('Error saving preferences:', error);
         }

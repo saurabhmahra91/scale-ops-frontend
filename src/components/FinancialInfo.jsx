@@ -10,6 +10,9 @@ import {
 
 export default function FinancialInfo(props) {
     const financialInfo = props.financialInfo;
+    if (!financialInfo) {
+        return <Typography>No financial information available.</Typography>;
+    }
 
     return (
         <Box mt={3}>

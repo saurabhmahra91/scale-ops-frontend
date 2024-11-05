@@ -73,9 +73,9 @@ export default function UserDetails(props) {
                         <SportsEsports fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
                         Interests
                     </Typography>
-                    <Typography variant="body2">
+                    {/* <Typography variant="body2">
                         {user.hobbies_interests.join(", ")}
-                    </Typography>
+                    </Typography> */}
                 </Paper>
                 <Paper elevation={1} sx={{ p: 2 }}>
                     <Typography variant="subtitle1" gutterBottom>
