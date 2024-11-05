@@ -200,7 +200,8 @@ export default function ExplorePeople() {
                         objectFit: 'cover',
                         objectPosition: 'center',
                     }}
-                    image={BASE_URL + "/"+ recommendedUser.image}
+                    // image={BASE_URL + "/"+ recommendedUser.image}
+                    image="https://thispersondoesnotexist.com/"
                     alt={recommendedUser.name}
                 />
                 <CardContent
