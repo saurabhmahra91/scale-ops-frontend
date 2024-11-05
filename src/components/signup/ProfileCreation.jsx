@@ -13,7 +13,6 @@ import Authentication from './Authentication';
 
 
 function ProfileCreation(props) {
-    console.log("hello world")
     const [progress, setProgress] = useState(1);
     const totalNumberOfSteps = 4;
     const signupComponent = (step) => {

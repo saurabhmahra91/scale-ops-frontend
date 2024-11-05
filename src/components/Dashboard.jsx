@@ -4,6 +4,7 @@ import SideDrawerLayout from './SideDrawerLayout';
 import ExplorePeople from './pages/ExplorePeople';
 
 function Dashboard() {
+
     const [loading, setLoading] = useState(false);
 
     if (loading) {

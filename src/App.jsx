@@ -8,6 +8,8 @@ import Default from './components/Default';
 import Dashboard from './components/Dashboard'; // You'll need to create this file
 import SideDrawerLayout from './components/SideDrawerLayout';
 
+import ProtectedRoute from './components/ProtectedRoute';
+
 const theme = createTheme({
     palette: {
         primary: {
@@ -36,6 +38,40 @@ const theme = createTheme({
             '"Segoe UI Symbol"',
         ].join(','),
     },
+    components: {
+        MuiOutlinedInput: {
+            styleOverrides: {
+                root: {
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(0, 0, 0, 0.23)', // default hover color
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#ff784b', // primary color
+                        borderWidth: '1px',
+                    },
+                },
+            },
+        },
+        MuiInputLabel: {
+            styleOverrides: {
+                root: {
+                    '&.Mui-focused': {
+                        color: '#ff784b', // primary color
+                    },
+                },
+            },
+        },
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    '&:focus': {
+                        outline: 'none',
+                        boxShadow: 'none',
+                    },
+                },
+            },
+        },
+    },
 });
 
 const WithSideDrawer = ({ children }) => (
@@ -47,11 +83,13 @@ function App() {
         <ThemeProvider theme={theme}>
             <Router>
                 <Routes>
-                    <Route element={<WithSideDrawer />}>
-                        <Route path="/" element={<Dashboard />} />
-                        <Route path="/chat" element={<Chat />} />
-                    </Route>
                     <Route path="/signup" element={<ProfileCreation />} />
+                    <Route element={<ProtectedRoute />}>
+                        <Route element={<WithSideDrawer />}>
+                            <Route path="/" element={<Dashboard />} />
+                            <Route path="/chat" element={<Chat />} />
+                        </Route>
+                    </Route>
                 </Routes>
             </Router>
         </ThemeProvider>
