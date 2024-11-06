@@ -23,108 +23,15 @@ import api, { BASE_URL } from '../../utils/auth_config';
 export default function ExplorePeople() {
     const [showMatchNotification, setShowMatchNotification] = useState(false);
     const [exhausted, setExhausted] = useState(false);
-    const [recommendedUser, setRecommendedUser] = useState({
-        id: 1,
-        name: "Jane Doe",
-        age: "25",
-        city: "New York, NY",
-        image: "https://st.depositphotos.com/25375842/53619/i/450/depositphotos_536197002-stock-photo-portrait-very-beautiful-attractive-indian.jpg",
-        gender: "Female",
-        marital_status: "Single",
-        nationality: "American",
-        mother_tongue: "English",
-        education_level: "Master's Degree",
-        college_attended: "Columbia University",
-        job_title: "Software Engineer",
-        company_name: "Tech Corp",
-        annual_income: 80000,
-        family_type: "Nuclear",
-        fathers_occupation: "Doctor",
-        mothers_occupation: "Teacher",
-        siblings: 2,
-        family_values: "Traditional",
-        dietary_preference: "Vegetarian",
-        smoking_habit: "Non-smoker",
-        drinking_habit: "Occasionally",
-        hobbies_interests: ["Reading", "Hiking", "Photography"],
-        financial_info: [
-            {
-                category: "Income Patterns",
-                parameters: [
-                    {
-                        name: "average_monthly_net_income",
-                        type: "decimal",
-                        representative_text: "Earns $8,000 per month",
-                        additional_text: "After taxes and deductions",
-                        icon: "Wallet"
-                    },
-                    {
-                        name: "income_stability",
-                        type: "enum",
-                        representative_text: "Has stable income pattern",
-                        additional_text: "Based on consistency of deposits",
-                        icon: "Shield"
-                    }
-                ]
-            },
-            {
-                category: "Savings Behavior",
-                parameters: [
-                    {
-                        name: "monthly_savings_rate",
-                        type: "decimal",
-                        representative_text: "Saves 20% of monthly income",
-                        additional_text: "Consistent monthly savings",
-                        icon: "PiggyBank"
-                    },
-                    {
-                        name: "has_emergency_fund",
-                        type: "bool",
-                        representative_text: "Has emergency fund",
-                        additional_text: "Minimum 6 months of expenses",
-                        icon: "Umbrella"
-                    }
-                ]
-            },
-            {
-                category: "Investment Activities",
-                parameters: [
-                    {
-                        name: "portfolio_diversity_score",
-                        type: "enum",
-                        representative_text: "Has high investment diversity",
-                        additional_text: "Across different asset classes",
-                        icon: "LineChart"
-                    }
-                ]
-            },
-            {
-                category: "Lifestyle Indicators",
-                parameters: [
-                    {
-                        name: "travel_spending_level",
-                        type: "enum",
-                        representative_text: "Has moderate travel spending",
-                        additional_text: "Annual vacation and travel expenses",
-                        icon: "Plane"
-                    },
-                    {
-                        name: "entertainment_budget",
-                        type: "decimal",
-                        representative_text: "Spends $500 on entertainment monthly",
-                        additional_text: "Including dining and activities",
-                        icon: "Film"
-                    }
-                ]
-            }
-        ]
-    });
+    const [recommendedUser, setRecommendedUser] = useState({});
+    const [userKey, setUserKey] = useState(0); // Add this line
 
 
     const fetchRecommendedUser = async () => {
         try {
             const response = await api.get('/engagement/recommend');
             setRecommendedUser(response.data);
+            setUserKey(prevKey => prevKey + 1); // Add this line
         } catch (error) {
             console.error('Error fetching random user:', error);
             // Handle the case when no new users are available
@@ -133,6 +40,10 @@ export default function ExplorePeople() {
             }
         }
     };
+
+    useEffect(() => {
+        console.log('Fetching recommended user', recommendedUser);
+    }, [recommendedUser]);
 
     useEffect(() => { console.log(recommendedUser, "recommended user") }, [recommendedUser])
     useEffect(() => { console.log(recommendedUser, "recommended user") }, [recommendedUser])
@@ -194,6 +105,7 @@ export default function ExplorePeople() {
 
             <CardActionArea>
                 <CardMedia
+                    key={userKey}
                     component="img"
                     sx={{
                         height: 800,

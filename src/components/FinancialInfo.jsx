@@ -10,7 +10,8 @@ import {
 
 export default function FinancialInfo(props) {
     const financialInfo = props.financialInfo;
-    if (!financialInfo) {
+    console.log(financialInfo, "financialInfo")
+    if (!financialInfo || financialInfo.length === 0 ) {
         return <Typography>No financial information available.</Typography>;
     }
 
